@@ -1,17 +1,5 @@
 from langchain_core.tools import tool
-
-class ImagePathContext:
-    def __init__(self, path):
-        self.path = path
-
-    def __enter__(self):
-        global image_path
-        image_path = self.path
-        return image_path
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        global image_path
-        image_path = None
+from langchain_community.tools import WikipediaQueryRun
 
 
 class ToolsContainer:
@@ -29,3 +17,47 @@ class ToolsContainer:
             raise ValueError("Image not set.")
         return "France"
 
+    @tool
+    def duck_duck_go_search(query: str) -> str:
+        """
+        Searches DuckDuckGo for the given query.
+
+        Args:
+            query (str): The query to search for.
+
+        Returns:
+            str: The results of the search.
+        """
+        return "DuckDuckGo: " + query
+
+    @tool
+    def reverse_image_search() -> str:
+        """Finds similar images to the given image.
+
+        Returns:
+            dict: The results of the search.
+        """
+        return {}
+
+    @tool
+    def wikimapia_search(query: str) -> str:
+        """
+        Searches Wikimapia for the given query.
+
+        Args:
+            query (str): The query to search for.
+
+        Returns:
+            str: The results of the search.
+        """
+        return "Wikimapia: " + query
+
+    @tool
+    def exif_metadata_extraction() -> str:
+        """
+        Returns the EXIF metadata of the image.
+
+        Returns:
+            dict: The EXIF metadata.
+        """
+        return {}
