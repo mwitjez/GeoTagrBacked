@@ -1,0 +1,9 @@
+{
+    "mean_distance_error": NaN,
+    "median_distance_error": NaN,
+    "std_distance_error": NaN,
+    "accuracy_1km": NaN,
+    "accuracy_10km": NaN,
+    "accuracy_100km": NaN,
+    "accuracy_1000km": NaN
+}
