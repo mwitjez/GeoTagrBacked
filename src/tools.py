@@ -1,24 +1,37 @@
-import os
-
-import requests
 from ratelimit import limits, sleep_and_retry
 from langchain_community.tools import DuckDuckGoSearchRun, WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_core.tools import tool
+from collections import Counter
 from PIL import Image
 import http.client
 import urllib.parse
 import json
-
+import requests
+import os
 
 class ToolsContainer:
-
     def __init__(self, image: Image = None):
         self.image = image
         self.predicted_country = None
+        self.tool_usage_counter = Counter()
+        self.tool_usage_restrictions = {
+            "country_prediction": 1,
+            "search_for_place": 2,
+            "wikipedia_search": 2,
+            "duckduckgo_search": 2,
+            "geocode": 1,
+        }
 
     def get_tools(self):
-        return [tool(self.search_for_place), tool(self.wikipedia_search)]
+        base = [self.search_for_place, self.wikipedia_search, self.duckduckgo_search, self.geocode]
+        tools_with_call_restrictions = [
+            tool(func)
+            for func in base
+            if self.tool_usage_counter[func.__name__]
+            < self.tool_usage_restrictions[func.__name__]
+        ]
+        return tools_with_call_restrictions
 
     def country_prediction(self) -> str:
         """
@@ -30,6 +43,7 @@ class ToolsContainer:
         """
         print(self.image)
         self.predicted_country = "Poland"
+        self.tool_usage_counter["country_prediction"] += 1
         return "Poland"
 
     @sleep_and_retry
@@ -45,23 +59,22 @@ class ToolsContainer:
             dict: The result containing places with addresses
         """
         conn = http.client.HTTPSConnection("nominatim.openstreetmap.org")
-        params = urllib.parse.urlencode({
-            'q': query,
-            'format': 'json',
-            'addressdetails': 1,
-            'limit': 1
-        })
+        params = urllib.parse.urlencode(
+            {"q": query, "format": "json", "addressdetails": 1, "limit": 1}
+        )
 
-        headers = {
-            'User-Agent': "geoai app"
-        }
+        headers = {"User-Agent": "geoai app"}
 
         conn.request("GET", f"/search?{params}", headers=headers)
         response = conn.getresponse()
         if response.status == 200:
-            data = response.read().decode('utf-8')
+            data = response.read().decode("utf-8")
             data = json.loads(data)
+            if len(data) == 0:
+                result = {"message": "No results found"}
+                return result
             result = data[0].get("address")
+            self.tool_usage_counter["search_for_place"] += 1
         else:
             result = {"error": response.status_code}
         return result
@@ -108,6 +121,7 @@ class ToolsContainer:
         """
         wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
         result = wikipedia.run(query)
+        self.tool_usage_counter["wikipedia_search"] += 1
         return result
 
     @sleep_and_retry
@@ -124,8 +138,8 @@ class ToolsContainer:
         """
         search = DuckDuckGoSearchRun()
         result = search.invoke(query)
+        self.tool_usage_counter["duckduckgo_search"] += 1
         return result
-
 
     # def exif_metadata_extraction(self) -> str:
     #     """

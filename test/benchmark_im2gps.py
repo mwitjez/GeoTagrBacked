@@ -4,7 +4,9 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Tuple
+import time
 
+import pprint
 import haversine as hs
 import numpy as np
 from dotenv import load_dotenv
@@ -33,7 +35,7 @@ class GeolocationEvaluator:
     def __init__(self, data_dir: Path, config_path: Path):
         self.data_dir = Path(data_dir)
         self.config = self._load_config(config_path)
-        self.results_path = Path('test/im2gps_result.json')
+        self.results_path = Path('test/im2gps_result2.json')
 
     @staticmethod
     def _load_config(config_path: Path) -> Dict:
@@ -78,6 +80,7 @@ class GeolocationEvaluator:
             'accuracy_25km': float(np.mean(distances <= 25)),
             'accuracy_200km': float(np.mean(distances <= 200)),
             'accuracy_750km': float(np.mean(distances <= 750)),
+            'accuracy_2500km': float(np.mean(distances <= 2500))
         }
 
     def load_ground_truth(self, csv_path: Path) -> Dict[str, Dict]:
@@ -97,9 +100,15 @@ class GeolocationEvaluator:
             if image_path.name == ".DS_Store" or image_path.name in results:
                 continue
             print(f"Processing {image_path.name}")
-            res = self.invoke_agent(image_path)
-            results[image_path.name] = res
-            self.results_path.write_text(json.dumps(results))
+            try:
+                res = self.invoke_agent(image_path)
+                results[image_path.name] = res
+                self.results_path.write_text(json.dumps(results))
+            except Exception:
+                time.sleep(60)
+                res = self.invoke_agent(image_path)
+                results[image_path.name] = res
+                self.results_path.write_text(json.dumps(results))
 
 
 def main():
@@ -131,14 +140,7 @@ def main():
         distances[name] = dist
 
     # Print top 10 results
-    value_key_pairs = [(value, key) for key, value in distances.items()]
-    top_10_pairs = sorted(value_key_pairs)[:10]
-
-    for distance, image_name in top_10_pairs:
-        print("=" * 40)
-        print(f"Image: {image_name}")
-        print(f"Distance Error: {distance:.2f} km")
-        print(f"Prediction: {results[image_name]}")
+    pprint.pprint(evaluator.calculate_metrics(np.array(list(distances.values()))))
 
 if __name__ == "__main__":
     main()

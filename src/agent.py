@@ -1,10 +1,14 @@
 import io
+import os
 
+import requests
 import PIL
-from IPython.display import Image
+import json
+from ratelimit import limits, sleep_and_retry
+from IPython.display import Image, display
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import END, START, MessagesState, StateGraph
-from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.prebuilt import ToolNode
 
 from src.response_format import Location
@@ -33,7 +37,7 @@ class Agent:
             response = AIMessage(content=f"Error: {str(e)}")
         return {"messages": [response]}
 
-    def _generate_final_coordinates(self, state: MessagesState):
+    def _get_final_coordinates(self, state: MessagesState):
         messages = state['messages']
         messages.append(HumanMessage(content="Given previous messages generate a location from the image (latitude, longitude) and reasoning why you picked this location. If you think you dont have enough information, just guess the location."))
         structured_model = self.model.with_structured_output(Location)
@@ -46,7 +50,7 @@ class Agent:
 
         workflow.add_node("agent", self._call_model)
         workflow.add_node("tools", tool_node)
-        workflow.add_node("final_location", self._generate_final_coordinates)
+        workflow.add_node("final_location", self._get_final_coordinates)
 
         workflow.add_edge(START, "agent")
         workflow.add_edge("tools", 'agent')
@@ -56,7 +60,10 @@ class Agent:
         graph = workflow.compile()
         return graph
 
-    def viz_graph(self):
-        img = Image(self.create_graph().get_graph().draw_mermaid_png())
-        pimg = PIL.Image.open(io.BytesIO(img.data))
-        pimg.show()
+    def viz_graph(self, ipynb=False):
+        if ipynb:
+            display(Image(self.create_graph().get_graph().draw_mermaid_png())) 
+        else:
+            img = Image(self.create_graph().get_graph().draw_mermaid_png())
+            pimg = PIL.Image.open(io.BytesIO(img.data))
+            pimg.show()

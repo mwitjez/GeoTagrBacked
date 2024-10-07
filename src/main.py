@@ -21,7 +21,8 @@ if __name__ == "__main__":
     load_dotenv()
 
     config = json.loads(open("src/config.json").read())
-    image_path = "test/test_images/test6.jpg"
+    ##Ograniczy kontekst wejściowy- zmieni rozmiar zdjecia!!!
+    image_path = "test/data/im2gps/Tunisia_00008_903924177_8eeea96057_1429_9416923@N08.jpg"
     image = Image.open(image_path)
     image_bytes = open(image_path, "rb").read()
     image_data = base64.b64encode(image_bytes).decode("utf-8")
@@ -37,4 +38,4 @@ if __name__ == "__main__":
     )
     agent = Agent(image=image)
     graph = agent.create_graph()
-    print_stream(graph.stream({"messages": [system, message], "recursion_limit": 5}, stream_mode="values"))
+    print_stream(graph.stream({"messages": [system, message], "recursion_limit": 1}, stream_mode="values"))
