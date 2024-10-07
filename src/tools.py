@@ -1,13 +1,14 @@
-from langchain_community.tools import WikipediaQueryRun
-from langchain_community.utilities import WikipediaAPIWrapper
-from langchain.tools.base import StructuredTool
-from langchain_core.tools import InjectedToolArg, tool
-from typing_extensions import Annotated
-from PIL import Image
-from exif_data_extractor import ExifDataExtractor
-from langchain_community.tools import DuckDuckGoSearchRun
-import requests
 import os
+
+import requests
+from ratelimit import limits, sleep_and_retry
+from langchain_community.tools import DuckDuckGoSearchRun, WikipediaQueryRun
+from langchain_community.utilities import WikipediaAPIWrapper
+from langchain_core.tools import tool
+from PIL import Image
+import http.client
+import urllib.parse
+import json
 
 
 class ToolsContainer:
@@ -17,7 +18,7 @@ class ToolsContainer:
         self.predicted_country = None
 
     def get_tools(self):
-        return [tool(self.geocode), tool(self.wikipedia_search), tool(self.duckduckgo_search)]
+        return [tool(self.search_for_place), tool(self.wikipedia_search)]
 
     def country_prediction(self) -> str:
         """
@@ -31,6 +32,42 @@ class ToolsContainer:
         self.predicted_country = "Poland"
         return "Poland"
 
+    @sleep_and_retry
+    @limits(calls=1, period=1)
+    def search_for_place(self, query: str):
+        """
+        Searches open street maps for given query
+        Args:
+
+        query (str): query to search for, can be a place name
+
+        Returns:
+            dict: The result containing places with addresses
+        """
+        conn = http.client.HTTPSConnection("nominatim.openstreetmap.org")
+        params = urllib.parse.urlencode({
+            'q': query,
+            'format': 'json',
+            'addressdetails': 1,
+            'limit': 1
+        })
+
+        headers = {
+            'User-Agent': "geoai app"
+        }
+
+        conn.request("GET", f"/search?{params}", headers=headers)
+        response = conn.getresponse()
+        if response.status == 200:
+            data = response.read().decode('utf-8')
+            data = json.loads(data)
+            result = data[0].get("address")
+        else:
+            result = {"error": response.status_code}
+        return result
+
+    @sleep_and_retry
+    @limits(calls=1000, period=60)
     def geocode(self, query: str):
         """
         Geocodes the given query. Returns the latitude and longitude of the query.
@@ -57,6 +94,8 @@ class ToolsContainer:
             result = {"error": response.status_code}
         return result
 
+    @sleep_and_retry
+    @limits(calls=500, period=2400)
     def wikipedia_search(self, query: str) -> str:
         """
         Searches Wikipedia for the given query.
@@ -71,6 +110,8 @@ class ToolsContainer:
         result = wikipedia.run(query)
         return result
 
+    @sleep_and_retry
+    @limits(calls=10, period=60)
     def duckduckgo_search(self, query: str) -> str:
         """
         Searches the web for the given query. Best matches could be acquired with description of a buildings, landmarks or landscape.

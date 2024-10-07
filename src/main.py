@@ -20,8 +20,8 @@ def print_stream(stream):
 if __name__ == "__main__":
     load_dotenv()
 
-    config = json.loads(open("/Users/mateuszwitka-jezewski/Documents/Projekty/GeoAI/src/config.json").read())
-    image_path = "/Users/mateuszwitka-jezewski/Documents/Projekty/GeoAI/test/data/im2gps/england_00090_496632589_c83b7bb9e9_226_91548597@N00.jpg"
+    config = json.loads(open("src/config.json").read())
+    image_path = "test/test_images/test6.jpg"
     image = Image.open(image_path)
     image_bytes = open(image_path, "rb").read()
     image_data = base64.b64encode(image_bytes).decode("utf-8")
