@@ -1,6 +1,7 @@
 import base64
 import json
 from PIL import Image
+from io import BytesIO
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -22,10 +23,12 @@ if __name__ == "__main__":
 
     config = json.loads(open("src/config.json").read())
     ##Ograniczy kontekst wejściowy- zmieni rozmiar zdjecia!!!
-    image_path = "test/data/im2gps/Tunisia_00008_903924177_8eeea96057_1429_9416923@N08.jpg"
+    image_path = "test/data/im2gps/97344248_30a4521091_32_77325609@N00.jpg"
     image = Image.open(image_path)
-    image_bytes = open(image_path, "rb").read()
-    image_data = base64.b64encode(image_bytes).decode("utf-8")
+    image = image.resize((1024, 1024)).convert('RGB')
+    byte_io = BytesIO()
+    image.save(byte_io, format='JPEG')
+    image_data = base64.b64encode(byte_io.getvalue()).decode("utf-8")
     system = SystemMessage(config["system_message"])
     message = HumanMessage(
         content=[

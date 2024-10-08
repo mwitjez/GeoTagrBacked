@@ -1,6 +1,7 @@
 from ratelimit import limits, sleep_and_retry
 from langchain_community.tools import DuckDuckGoSearchRun, WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
+from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
 from langchain_core.tools import tool
 from collections import Counter
 from PIL import Image
@@ -136,7 +137,8 @@ class ToolsContainer:
         Returns:
             str: The results of the search.
         """
-        search = DuckDuckGoSearchRun()
+        wrapper = DuckDuckGoSearchAPIWrapper(max_results=2)
+        search = DuckDuckGoSearchRun(api_wrapper=wrapper)
         result = search.invoke(query)
         self.tool_usage_counter["duckduckgo_search"] += 1
         return result

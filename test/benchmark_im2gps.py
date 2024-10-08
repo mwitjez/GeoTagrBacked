@@ -5,7 +5,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Tuple
 import time
+from io import BytesIO
 
+from ratelimit import limits, sleep_and_retry
 import pprint
 import haversine as hs
 import numpy as np
@@ -41,11 +43,15 @@ class GeolocationEvaluator:
     def _load_config(config_path: Path) -> Dict:
         return json.loads(config_path.read_text())
 
+    @limits(calls=5, period=60)
     def invoke_agent(self, image_path: Path) -> Dict:
         """Invoke the agent with an image and return its prediction."""
         image = Image.open(image_path)
-        image_bytes = image_path.read_bytes()
-        image_data = base64.b64encode(image_bytes).decode("utf-8")
+        image = Image.open(image_path)
+        image = image.resize((1024, 1024)).convert('RGB')
+        byte_io = BytesIO()
+        image.save(byte_io, format='JPEG')
+        image_data = base64.b64encode(byte_io.getvalue()).decode("utf-8")
         system = SystemMessage(self.config["system_message"])
         message = HumanMessage(
             content=[
