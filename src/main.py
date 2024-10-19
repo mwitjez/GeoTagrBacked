@@ -27,7 +27,7 @@ if __name__ == "__main__":
     load_dotenv()
 
     config = json.loads(open("src/config.json").read())
-    image_path = "test/test_images/test7.jpg"
+    image_path = "test/test_images/test.jpg"
     image = Image.open(image_path)
     image = resize_image(image)
     byte_io = BytesIO()
