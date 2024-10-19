@@ -1,10 +1,6 @@
 import io
-import os
 
-import requests
 import PIL
-import json
-from ratelimit import limits, sleep_and_retry
 from IPython.display import Image, display
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -39,7 +35,7 @@ class Agent:
 
     def _get_final_coordinates(self, state: MessagesState):
         messages = state['messages']
-        messages.append(HumanMessage(content="Given previous messages generate a location from the image (latitude, longitude) and reasoning why you picked this location. If you think you dont have enough information, just guess the location."))
+        messages.append(HumanMessage(content="Given previous messages generate a location from the image (latitude, longitude) and reasoning why you picked this location. If you think you don't have enough information, just guess the location."))
         structured_model = self.model.with_structured_output(Location)
         response = structured_model.invoke(messages)
         return {"messages": [str(response.model_dump_json())]}

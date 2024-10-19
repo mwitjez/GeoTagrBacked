@@ -17,15 +17,19 @@ def print_stream(stream):
         else:
             message.pretty_print()
 
+def resize_image(img, max_size=1024):
+    scale = max_size / max(img.size) if max(img.size) > max_size else 1
+    resized = img.resize([int(d * scale) for d in img.size], Image.Resampling.LANCZOS).convert('RGB')
+    return resized
+
 
 if __name__ == "__main__":
     load_dotenv()
 
     config = json.loads(open("src/config.json").read())
-    ##Ograniczy kontekst wejściowy- zmieni rozmiar zdjecia!!!
-    image_path = "test/data/im2gps/97344248_30a4521091_32_77325609@N00.jpg"
+    image_path = "test/test_images/test7.jpg"
     image = Image.open(image_path)
-    image = image.resize((1024, 1024)).convert('RGB')
+    image = resize_image(image)
     byte_io = BytesIO()
     image.save(byte_io, format='JPEG')
     image_data = base64.b64encode(byte_io.getvalue()).decode("utf-8")

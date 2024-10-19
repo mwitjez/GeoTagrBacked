@@ -7,7 +7,6 @@ from typing import Dict, Tuple
 import time
 from io import BytesIO
 
-from ratelimit import limits, sleep_and_retry
 import pprint
 import haversine as hs
 import numpy as np
@@ -37,18 +36,21 @@ class GeolocationEvaluator:
     def __init__(self, data_dir: Path, config_path: Path):
         self.data_dir = Path(data_dir)
         self.config = self._load_config(config_path)
-        self.results_path = Path('test/im2gps_result2.json')
+        self.results_path = Path('test/im2gps_result4.json')
 
     @staticmethod
     def _load_config(config_path: Path) -> Dict:
         return json.loads(config_path.read_text())
 
-    @limits(calls=5, period=60)
+    def resize_image(self, img, max_size=1024):
+        scale = max_size / max(img.size) if max(img.size) > max_size else 1
+        resized = img.resize([int(d * scale) for d in img.size], Image.Resampling.LANCZOS).convert('RGB')
+        return resized
+
     def invoke_agent(self, image_path: Path) -> Dict:
         """Invoke the agent with an image and return its prediction."""
         image = Image.open(image_path)
-        image = Image.open(image_path)
-        image = image.resize((1024, 1024)).convert('RGB')
+        image = self.resize_image(image)
         byte_io = BytesIO()
         image.save(byte_io, format='JPEG')
         image_data = base64.b64encode(byte_io.getvalue()).decode("utf-8")
@@ -69,6 +71,15 @@ class GeolocationEvaluator:
             stream_mode="values"
         )
         return json.loads(res["messages"][-1].content)
+    
+    def retry(fun, max_tries=10):
+        for i in range(max_tries):
+            try:
+                time.sleep(0.3) 
+                fun()
+                break
+            except Exception:
+                continue
 
     @staticmethod
     def calculate_distance_error(pred: Coordinates, true: Coordinates) -> float:
@@ -106,15 +117,15 @@ class GeolocationEvaluator:
             if image_path.name == ".DS_Store" or image_path.name in results:
                 continue
             print(f"Processing {image_path.name}")
-            try:
-                res = self.invoke_agent(image_path)
-                results[image_path.name] = res
-                self.results_path.write_text(json.dumps(results))
-            except Exception:
-                time.sleep(60)
-                res = self.invoke_agent(image_path)
-                results[image_path.name] = res
-                self.results_path.write_text(json.dumps(results))
+            for _ in range(10):
+                try:
+                    res = self.invoke_agent(image_path)
+                    break
+                except Exception:
+                    time.sleep(70)
+                    continue
+            results[image_path.name] = res
+            self.results_path.write_text(json.dumps(results))
 
 
 def main():
