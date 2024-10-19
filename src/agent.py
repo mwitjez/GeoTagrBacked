@@ -1,7 +1,3 @@
-import io
-
-import PIL
-from IPython.display import Image, display
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import END, START, MessagesState, StateGraph
@@ -55,11 +51,3 @@ class Agent:
 
         graph = workflow.compile()
         return graph
-
-    def viz_graph(self, ipynb=False):
-        if ipynb:
-            display(Image(self.create_graph().get_graph().draw_mermaid_png())) 
-        else:
-            img = Image(self.create_graph().get_graph().draw_mermaid_png())
-            pimg = PIL.Image.open(io.BytesIO(img.data))
-            pimg.show()

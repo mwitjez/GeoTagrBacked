@@ -56,7 +56,6 @@ analyzer = GeolocationImageAnalyzer(config={"system_message": "Your system messa
 
 @app.post("/process-image")
 async def process_image(file: UploadFile = File(...)):
-    # Read image from the uploaded file
     image = Image.open(BytesIO(await file.read()))
     result = analyzer.process_image(image)
     return JSONResponse(content=result)
