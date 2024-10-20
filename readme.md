@@ -1,4 +1,4 @@
-# 🌍 GeoAI 📸
+# 🌍 GeoTagr 📸
 
 GeoAI is a smart and intuitive application designed to extract the location information from your uploaded photos. It's an agent based system on Langchain and google LLM- Gemini Flash 1.5.
 
