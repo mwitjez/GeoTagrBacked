@@ -1,20 +1,11 @@
 # 🌍 GeoAI 📸
 
-GeoAI is a smart and intuitive application designed to extract the location information from your uploaded photos. It's a perfect tool for travel enthusiasts, photographers, or anyone curious about where their photos were taken.
+GeoAI is a smart and intuitive application designed to extract the location information from your uploaded photos. It's an agent based system on Langchain and google LLM- Gemini Flash 1.5.
 
 ## Table of Contents
-1. [Features ✨](#features)
-2. [Installation 🔧](#installation)
-3. [Usage 🔄](#usage)
-4. [Contributing 🤝](#contributing)
-5. [License 📄](#license)
-6. [Contact 📩](#contact)
+1. [Installation 🔧](#installation)
+2. [Usage 🔄](#usage)
 
-## Features ✨
-- Extract location data from photos
-- Display the location on an interactive map
-- Save and manage your photo locations
-- Share your photo locations with friends
 
 ## Installation 🔧
 To get started with GeoAI, follow these steps:
@@ -35,19 +26,7 @@ To get started with GeoAI, follow these steps:
 ## Usage 🔄
 1. Run the application:
    ```
-   streamlit run main.py
+    uvicorn app:app --reload   
    ```
-2. Upload a photo using the provided interface.
-3. GeoAI will automatically extract the location data and display it on a map.
-4. Save, manage, and share your photo locations as desired.
-
-## Contributing  🤝
-We welcome contributions from the community. If you wish to contribute, please take a moment to review our contributing guidelines.
-
-## License 📄
-GeoAI is released under the MIT License. See [LICENSE](LICENSE) for more information.
-
-## Contact 📩
-For any questions, suggestions, or feedback, feel free to reach out to us at geoai.support@email.com.
-
-Happy exploring with GeoAI 🌍📸!
+2. Upload a photo via /docs or http request
+3. The response is in a json format with latitude, longitude and reasoning keys.
