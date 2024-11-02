@@ -92,7 +92,6 @@ class GeolocationEvaluator:
         return {
             'mean_distance_error': float(np.mean(distances)),
             'median_distance_error': float(np.median(distances)),
-            'std_distance_error': float(np.std(distances)),
             'accuracy_1km': float(np.mean(distances <= 1)),
             'accuracy_25km': float(np.mean(distances <= 25)),
             'accuracy_200km': float(np.mean(distances <= 200)),
