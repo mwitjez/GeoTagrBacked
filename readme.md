@@ -59,9 +59,9 @@ GeoTagr analyzes images and returns predicted coordinates along with detailed re
 4. Response Format:
    ```json
    {
-     "latitude": float,      // Predicted latitude coordinate
-     "longitude": float,     // Predicted longitude coordinate
-     "reasoning": string,    // AI's explanation for the prediction
+     "latitude": str,
+     "longitude": str,
+     "reasoning": str,
    }
    ```
 
