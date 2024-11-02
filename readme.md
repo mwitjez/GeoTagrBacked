@@ -20,7 +20,7 @@ GeoTagr analyzes images and returns predicted coordinates along with detailed re
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/geotagr.git
+   git clone https://github.com/mwitjez/GeoTagrBacked.git
    cd geotagr
    ```
 
