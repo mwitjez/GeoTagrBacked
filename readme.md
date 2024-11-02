@@ -27,7 +27,7 @@ GeoTagr analyzes images and returns predicted coordinates along with detailed re
 2. Set up environment variables:
    ```bash
    # Copy the template
-   cp .env-template .env
+   cp .env_template .env
    
    # Edit .env with your credentials
    nano .env
