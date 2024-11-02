@@ -16,32 +16,61 @@ GeoTagr analyzes images and returns predicted coordinates along with detailed re
 
 ## Usage 🔄
 
+### Prerequisites ⚙️
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/geotagr.git
+   cd geotagr
+   ```
+
+2. Set up environment variables:
+   ```bash
+   # Copy the template
+   cp .env-template .env
+   
+   # Edit .env with your credentials
+   nano .env
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
 ### Option 1: REST API 🌐
 
 1. Start the API server:
    ```bash
-   uvicorn app:app --reload
+   uvicorn app:app --reload --port 8000
    ```
 
 2. Access the API:
-   - Use the Swagger UI at `/docs`
-   - Send HTTP requests directly
+   - Interactive Documentation: Visit `http://localhost:8000/docs`
+   - Direct API endpoint: `http://localhost:8000/process-image`
 
-3. Response Format:
+3. Make a prediction:
+   ```bash
+   curl -X POST "http://localhost:8000/process-image" \
+     -H "Content-Type: multipart/form-data" \
+     -F "file=@/path/to/your/image.jpg"
+   ```
+
+4. Response Format:
    ```json
    {
-     "latitude": float,
-     "longitude": float,
-     "reasoning": string
+     "latitude": float,      // Predicted latitude coordinate
+     "longitude": float,     // Predicted longitude coordinate
+     "reasoning": string,    // AI's explanation for the prediction
    }
    ```
 
 ### Option 2: Command Line 💻
 
-Run the script directly with test images:
-```bash
-python3 src/main.py
-```
+1. Run with a single image specified in main.py:
+   ```bash
+   python src/main.py
+   ```
 
 ## Performance 📊
 
