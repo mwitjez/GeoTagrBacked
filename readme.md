@@ -1,10 +1,10 @@
-# GeoTagr 🌍📸 🤖
+# GeoTagr 🌍 📸 🤖
 
 GeoTagr is an AI-powered tool that predicts the geographical location of photos using a LangChain-based agent system powered by Google's Gemini Flash 1.5 LLM.
 
 ## Overview 🎯
 
-GeoTagr analyzes images and returns predicted coordinates along with detailed reasoning for its predictions.
+GeoTagr analyzes images and returns predicted coordinates along with detailed reasoning for its predictions. You can test it [HERE](https://huggingface.co/spaces/mwitjez/GeoTagr)
 
 ## Project Structure 📁
 
@@ -42,7 +42,7 @@ GeoTagr analyzes images and returns predicted coordinates along with detailed re
 
 1. Start the API server:
    ```bash
-   uvicorn app:app --reload --port 8000
+   uvicorn api:app --reload --port 8000
    ```
 
 2. Access the API:
@@ -70,6 +70,13 @@ GeoTagr analyzes images and returns predicted coordinates along with detailed re
 1. Run with a single image specified in main.py:
    ```bash
    python src/main.py
+   ```
+
+### Option 3: Streamlit 🎈
+
+1. Run wita a Streamlit interface:
+   ```bash
+   streamlit run app.py
    ```
 
 ## Performance 📊
