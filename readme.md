@@ -74,7 +74,7 @@ GeoTagr analyzes images and returns predicted coordinates along with detailed re
 
 ### Option 3: Streamlit 🎈
 
-1. Run wita a Streamlit interface:
+1. Run using Streamlit interface:
    ```bash
    streamlit run app.py
    ```
